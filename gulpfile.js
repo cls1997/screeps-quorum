@@ -40,46 +40,6 @@ gulp.task('copy', ['clean'], () => {
   })).pipe(gulp.dest('dist/'))
 })
 
-function deploy () {
-  let config = require('./.screeps.json')
-  let opts = config[args.server || 'main']
-  let options = {}
-  if (!opts) {
-    let err = new Error(`No configuration exists for server "${args.server || 'main'}`)
-    err.showStack = false
-    throw err
-  }
-
-  // allow overrides from passed arguments
-  for (let i in args) { // jshint ignore:line
-    opts[i] = args[i]
-  }
-
-  options.ptr = opts.ptr || false
-  options.branch = opts.branch || 'default'
-
-  if (opts.token) {
-    options.token = opts.token
-  } else {
-    options.email = opts.email || opts.username
-    options.password = opts.password
-  }
-
-  if (args.server && args.server !== 'main' && !opts.host) {
-    options.host = args.server
-  } else {
-    options.host = opts.host || 'screeps.com'
-  }
-  options.secure = !!opts.ssl || (options.host === 'screeps.com')
-  options.port = opts.port || 443
-
-  return gulp.src('dist/*.js').pipe(screeps(options))
-}
-
-gulp.task('deploy', ['copy'], () => {
-  return deploy()
-})
-
 gulp.task('ci-config', ['ci-version'], (cb) => {
   fs.writeFile('.screeps.json', JSON.stringify({
     main: {
@@ -103,4 +63,4 @@ gulp.task('ci-version', (cb) => {
   fs.writeFile('package.json', JSON.stringify(pkg, null, 2), cb)
 })
 
-gulp.task('default', ['clean', 'copy', 'deploy'])
+gulp.task('default', ['clean', 'copy'])
